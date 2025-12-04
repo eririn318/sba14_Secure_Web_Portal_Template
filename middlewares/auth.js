@@ -14,7 +14,8 @@ function authMiddleware(req, res, next) {
   }
   
   if (!token) {
-    next();
+    return res.status(403).json({message: "Please Login"})
+    // next();
   }
   
   // If token can be verified, add the decoded user's data to the request so it can be accessed in the resolver
@@ -23,6 +24,7 @@ function authMiddleware(req, res, next) {
     req.user = data;
   } catch {
     console.log("Invalid token");
+   
   }
 
   // Return the request object so it can be passed to the resolver as `context`
