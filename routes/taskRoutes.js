@@ -2,28 +2,29 @@ const express = require('express')
 const Project= require("../models/Project")
 const {authMiddleware} = require('../middlewares/auth')
 
-const projectRouter=express.Router()
+const taskRouter=express.Router()
 
 // protects all route in this router
-projectRouter.use(authMiddleware)
+taskRouter.use(authMiddleware)
 
-// GET http://localhost:4000/api/projects
+// GET http://localhost:4000/api/projects/6930c3b9b677d4532c263c0f/tasks
 // GET /api/projects
-projectRouter.get('/', async(req, res) =>{
-    try{
-        //to filter the project
-        const userProjects = await Project.find({user: req.user._id})
-        res.json(userProjects)
-    }catch(error){
-        console.error(error)
-        res.status(500).json({error: error.message})
-    }
+taskRouter.get('/:projectId/tasks', async(req, res) =>{
+    // try{
+    //     //to filter the project
+    //     const userProjects = await Project.find({user: req.user._id})
+    //     res.json(userProjects)
+    // }catch(error){
+    //     console.error(error)
+    //     res.status(500).json({error: error.message})
+    // }
     // res.send('sending a;; projects.....')
+    res.json({message: "success"})
 })
 
 // GET project by id
 // GET /api/projects/projectId
-projectRouter.get('/:projectId', async(req, res) =>{
+taskRouter.get('/:projectId', async(req, res) =>{
     try{
         const {projectId} = req.params
         // const project = await Project.findById(req.params.projectId)
@@ -50,7 +51,7 @@ projectRouter.get('/:projectId', async(req, res) =>{
 
 
 // POST /api/projects
-projectRouter.post('/', async(req, res) =>{
+taskRouter.post('/', async(req, res) =>{
     try{
         
         const newProject = await Project.create({
@@ -70,11 +71,11 @@ projectRouter.post('/', async(req, res) =>{
 })
 
 // PUT /api/projects/projectId
-projectRouter.put('/:projectId', async(req, res) =>{
+taskRouter.put('/:projectId', async(req, res) =>{
     try {
         // params means from url
         // req.params->finding (//localhost4000/project/123)
-        const {projectId} = req.params
+        const {projectId} = req.params.projectId
         // This needs an authorization check
         // find the Project to update
         // const projectToUpdate = await Project.findById(req.params.id);
@@ -106,7 +107,7 @@ projectRouter.put('/:projectId', async(req, res) =>{
 
 
 // DELETE /api/projects/projectId
-projectRouter.delete('/:projectId', async(req, res) =>{
+taskRouter.delete('/:projectId', async(req, res) =>{
         try {
           // only created by this user can delete 
           //find the note to delete by id
@@ -124,7 +125,7 @@ projectRouter.delete('/:projectId', async(req, res) =>{
             return res.status(404).json({ message: "No project found with this id!" });
           }
           
-
+          
           res.json({ message: "Project deleted!" });
         } catch (err) {
           res.status(500).json(err);
@@ -132,7 +133,7 @@ projectRouter.delete('/:projectId', async(req, res) =>{
       });
 
 
-module.exports =  projectRouter
+module.exports =  taskRouter
 
 // POST http://localhost:4000/api/users to create user
 // {
@@ -173,8 +174,4 @@ module.exports =  projectRouter
 
 // DELETE http://localhost:4000/api/projects/6930c345da346369b64870bb delete by id
 
-// POST /api/projects: Create a new project. The owner’s ID must be taken from the req.user object (provided by the auth middleware) and saved with the new project.
-// GET /api/projects: Get all projects owned by the currently logged-in user.
-// GET /api/projects/:id: Get a single project by its ID. This must be protected by an ownership check—a user can only get a project they own.
-// PUT /api/projects/:id: Update a project. Also protected by an ownership check.
-// DELETE /api/projects/:id: Delete a project. Also protected by an ownership check.
+// GET http://localhost:4000/api/projects/6930c3b9b677d4532c263c0f/tasks (tasks)
