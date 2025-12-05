@@ -175,3 +175,17 @@ module.exports =  taskRouter
 // DELETE http://localhost:4000/api/projects/6930c345da346369b64870bb delete by id
 
 // GET http://localhost:4000/api/projects/6930c3b9b677d4532c263c0f/tasks (tasks)
+
+
+
+
+// Task Routes: Create taskRoutes.js.
+// Nested & Secure: The key here is that tasks are children of projects. This relationship must be reflected in your routes and your security model.
+// Full CRUD for Tasks:
+// POST /api/projects/:projectId/tasks: Create a new task for a specific project. Before creating the task, you must verify that the logged-in user owns the project specified by :projectId.
+// GET /api/projects/:projectId/tasks: Get all tasks for a specific project. This also requires an ownership check on the parent project.
+// PUT /api/tasks/:taskId: Update a single task. This is the most complex authorization check. You must:
+// Find the task by :taskId.
+// From the task, find its parent project.
+// Verify that the logged-in user owns that parent project.
+// DELETE /api/tasks/:taskId: Delete a single task. This requires the same complex authorization check as the update route.
