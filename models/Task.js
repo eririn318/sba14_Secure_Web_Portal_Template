@@ -22,11 +22,15 @@ const taskSchema = new mongoose.Schema({
         type: String,
         // any other you try to do validate will be validation error
         // value of status
-        enum:['todo', 'in-progress', 'done']
+        enum:['todo', 'in-progress', 'done'],
+      
      }
+     },{
+      // createdAt and updatedAt automatically
+      timestamps:true 
 });
 
-const Task = mongoose.model('Project', taskSchema);
+const Task = mongoose.model('Task', taskSchema);
 module.exports = Task;
 
 

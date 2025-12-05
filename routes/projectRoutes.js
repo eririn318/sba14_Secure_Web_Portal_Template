@@ -35,8 +35,8 @@ projectRouter.get("/:projectId", async (req, res) => {
         .json({ message: `Project with id: ${projectId} not found!` });
     }
     //Authorization
-    console.log(req.user._id);
-    console.log(project.user);
+    // console.log(req.user._id);
+    // console.log(project.user);
 
     if (project.user.toString() !== req.user._id) {
       return res.status(403).json({ message: "User is not authorized" });
