@@ -87,65 +87,61 @@ taskRouter.post('/:projectId/tasks', async(req, res) =>{
   
 })
 
-// PUT /api/projects/projectId
-taskRouter.put('/:projectId', async(req, res) =>{
+// Helper function for PUT & DELETE
+async function verifyTaskOwnership(taskId, userId){
+    const task = await Task.findById(taskId)
+    if(!task) return {error: "Task not found"}
+
+        // find parent project(projectId for taskId)
+        const project = await Project.findById(task.project)
+        // if not fond -> error
+        if(!project) return {error:"Parent project not found"}
+
+        // if user is whether login or not
+        // project.user=(if user of project) is not userId
+        if(project.user.toString() !== userId.toString()){
+            return {error: "Not authorized"}
+        }
+        // const task , const project
+        // returning taskId, projectId
+        return {task, project}
+}
+
+
+// PUT /tasks/:taskId 
+taskRouter.put('/tasks/:taskId', async(req, res) =>{
     try {
         // params means from url
-        // req.params->finding (//localhost4000/project/123)
-        const {projectId} = req.params.projectId
-        // This needs an authorization check
-        // find the Project to update
-        // const projectToUpdate = await Project.findById(req.params.id);
-        const projectToUpdate = await Project.findById(projectId);
-        
-        // if user id is not match, it will be error(403)
-        // check if the current user is the owner of the note
-        if (req.user._id !== projectToUpdate.user.toString()) {
-          return res
-            .status(403)
-            .json({ message: "User is not authorized to update this project."});
-        }
-        
+        // req.params->finding (//localhost4000/project/123), params =123
+        const {taskId} = req.params
+        // whatever you get error, it will be store in error
+        const {error} = await verifyTaskOwnership(taskId, req.user._id)
+
+        // if error "Not authorize->403, other error->404" .json is any error (message:error)/display json format in postman
+        if(error) return res.status(error==="Not authorized" ? 403: 404).json({message:error})
+
         // finding id and body(name & description)
         // MongoDB id->body (in order/req.params.projectId, req.body)
-        const project = await Project.findByIdAndUpdate(req.params.projectId, req.body, {
-              new: true,
-        });
-        // if id of project does not found, return 404
-        if(!project) {
-        //   return res.status(404).json({ message: "No project found with this id!" });
-          return res.status(404).json({ message: `No project found with ${projectId}! `});
-        }
-        res.json(project);
+        const updateTask = await Task.findByIdAndUpdate(taskId,req.body, {new: true})
+        res.json(updateTask)
+    
     }catch(error){
-        res.status(500).json(error);
+        res.status(500).json({error:error.message});
     }
 })
 
+// DELETE /tasks/:taskId
+taskRouter.delete('/tasks/:taskId', async(req, res) =>{
+        try {      
+        const {taskId} = req.params
+        const {error, task} = await verifyTaskOwnership(taskId, req.user._id)
+        if(error) return res.status(error==="Not authorized" ? 403: 404).json({message:error})
 
-// DELETE /api/projects/projectId
-taskRouter.delete('/:projectId', async(req, res) =>{
-        try {
-          // only created by this user can delete 
-          //find the note to delete by id
-          const projectToDelete = await Project.findById(req.params.projectId)
-      
-          //Check if the current user is the owner of the note
-          if(req.user._id !== projectToDelete.user.toString()){
-              return res.status(403).json({message: 'User is not authorized to delete this project'})
-          }
-      
-        // This needs an authorization check
-        // whatever passing on url(id)
-          const project = await Project.findByIdAndDelete(req.params.projectId);
-          if (!project) {
-            return res.status(404).json({ message: "No project found with this id!" });
-          }
-          
-          
-          res.json({ message: "Project deleted!" });
-        } catch (err) {
-          res.status(500).json(err);
+          await Task.findByIdAndDelete(taskId);
+          res.json({ message: "Tasks deleted!" });
+
+        } catch (error) {
+          res.status(500).json({error:error.message});
         }
       });
 
@@ -209,7 +205,22 @@ module.exports =  taskRouter
 
 
 
-// POST http://localhost:4000/api/projects/6932759ae21ed86516880b93/tasks to create task
+// ========task=========
+
+
+// POST http://localhost:4000/api/projects/6932759ae21ed86516880b93/tasks to create task (projectId)
 // {  "title": "4th Project task",
 //     "description": "4th Project task details..."
 //     }
+
+
+// GET http://localhost:4000/api/projects/6930c3b9b677d4532c263c0f/tasks (projectId) to get taskId
+
+
+// PUT http://localhost:4000/api/projects/tasks/6933bd2729ca2c9f02f1f427 (taskId) to change task
+// {      
+//     "title": "tasks for 1st project changed",
+//     "description": "tasks for 1st project changed"
+//    }
+
+// DELETE http://localhost:4000/api/projects/tasks/6933bd2729ca2c9f02f1f427 (taskId) to delete task
